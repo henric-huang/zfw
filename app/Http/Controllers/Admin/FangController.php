@@ -18,7 +18,6 @@ class FangController extends BaseController
         //获取数据
         // with 关联关系的调用
         $data = Fang::with(['owner'])->paginate($this->pagesize);
-//        dd($data->toArray());
         // 指定视图模板并赋值
         return view('admin.fang.index', compact('data'));
     }
@@ -67,12 +66,7 @@ class FangController extends BaseController
         return view('admin.fang.create', compact(['ownerData', 'cityData', 'fang_rent_type_data', 'fang_direction_data', 'fang_rent_class_data', 'fang_config_data']));*/
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
+    // 房源添加处理
     public function store(FangRequest $request)
     {
         // 获取数据
@@ -80,12 +74,14 @@ class FangController extends BaseController
         // 入库
         $model = Fang::create($dopost);
         // 添加数据入库成功了
+
         // 发起HTTP请求
         // 申明一个请求类，并指定请求的过期时间
         $client = new Client(['timeout' => 2]);
         // 得到请求地址
-        $url = config('gaode.geocode');
-        $url = sprintf($url, $model->fang_addr, $model->fang_province);
+        $url      = config('gaode.geocode');
+        $province = City::where('id', $model->fang_province)->value('name');
+        $url      = sprintf($url, $model->fang_addr, $province);
         // 发起请求
         $response = $client->get($url);
         $body     = (string)$response->getBody();
@@ -128,7 +124,7 @@ class FangController extends BaseController
         $status = $request->get('status');
         // 根据ID修改状态
         Fang::where('id', $id)->update(['fang_status' => $status]);
-        return ['status' => 0, 'msg' => '修改成功'];
+        return ['status' => 0, 'msg' => '修改状态成功'];
     }
 
     // 生成房源信息索引
@@ -187,27 +183,66 @@ class FangController extends BaseController
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param \App\Models\Fang $fang
-     * @return \Illuminate\Http\Response
-     */
+    // 修改房源显示
     public function edit(Fang $fang)
     {
-        //
+        $data                      = (new Fang())->relationData();
+        $currentCityData           = City::where('pid', $fang->fang_province)->get();
+        $currentRegionData         = City::where('pid', $fang->fang_city)->get();
+        $data['currentCityData']   = $currentCityData;
+        $data['currentRegionData'] = $currentRegionData;
+        $data['fang']              = $fang;
+        return view('admin.fang.edit', $data);
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Fang $fang
-     * @return \Illuminate\Http\Response
-     */
+    // 修改处理 // 表单验证
     public function update(Request $request, Fang $fang)
     {
-        //
+        // 接受表单数据
+        $data = $request->except(['_token', 'file', '_method']);
+        // 修改入库
+        $fang->update($data);
+
+        // 发起HTTP请求
+        // 申明一个请求类，并指定请求的过期时间
+        $client = new Client(['timeout' => 2]);
+        // 得到请求地址
+        $url      = config('gaode.geocode');
+        $province = City::where('id', $fang->fang_province)->value('name');
+        $url      = sprintf($url, $fang->fang_addr, $province);
+        // 发起请求
+        $response = $client->get($url);
+        $body     = (string)$response->getBody();
+        $arr      = json_decode($body, true);
+        // 如果找到了对应经纬度，存入数据表中
+        if (count($arr['geocodes']) > 0) {
+            $locationArr = explode(',', $arr['geocodes'][0]['location']);
+            $fang->update([
+                'longitude' => $locationArr[0],
+                'latitude'  => $locationArr[1]
+            ]);
+        }
+
+        // es数据的修改
+        // 得到es客户端对象
+        $client = ClientBuilder::create()->setHosts(config('es.host'))->build();
+        // 修改文档
+        $params = [
+            'index' => 'fang',
+            'type'  => '_doc',
+            // 只需要ID存在就修改
+            'id'    => $fang->id,
+            'body'  => [
+                'fang_name' => $fang->fang_name,
+                'fang_desn' => $fang->fang_desn,
+            ],
+        ];
+        // 修改数据到索引文档中
+        $client->index($params);
+
+        // 跳转
+        return redirect(route('admin.fang.index'));
     }
 
     /**

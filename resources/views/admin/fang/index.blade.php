@@ -8,18 +8,18 @@
     <link rel="stylesheet" type="text/css" href="/admin/static/h-ui.admin/skin/default/skin.css" id="skin"/>
     <link rel="stylesheet" type="text/css" href="/admin/static/h-ui.admin/css/style.css"/>
     <link rel="stylesheet" type="text/css" href="/css/pagination.css"/>
-    <title>房东列表</title>
+    <title>用户列表</title>
 </head>
 <body>
 <nav class="breadcrumb">
     <i class="Hui-iconfont">&#xe67f;</i> 首页
-    <span class="c-gray en">&gt;</span> 房东中心
-    <span class="c-gray en">&gt;</span> 房东列表
+    <span class="c-gray en">&gt;</span> 房源管理
+    <span class="c-gray en">&gt;</span> 房源列表
     <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px"
        href="javascript:location.replace(location.href);" title="刷新"><i class="Hui-iconfont">&#xe68f;</i></a>
 </nav>
 
-{{-- 消息提示--}}
+{{-- 消息提示 --}}
 @include('admin.common.msg')
 
 <div class="page-container">
@@ -30,7 +30,7 @@
         <input type="text" onfocus="WdatePicker({ minDate:'#F{$dp.$D(\'datemin\')}',maxDate:'%y-%M-%d' })" id="datemax"
                class="input-text Wdate" style="width:120px;">
         <input type="text" class="input-text" style="width:250px" placeholder="输入会员名称、电话、邮箱" id="" name="">
-        <button type="submit" class="btn btn-success radius" id="" name=""><i class="Hui-iconfont">&#xe665;</i> 搜房东
+        <button type="submit" class="btn btn-success radius" id="" name=""><i class="Hui-iconfont">&#xe665;</i> 搜用户
         </button>
     </div>
     <div class="cl pd-5 bg-1 bk-gray mt-20">
@@ -38,11 +38,11 @@
             <a class="btn btn-danger radius" onclick="deleteAll()">
                 <i class="Hui-iconfont">&#xe6e2;</i> 批量删除
             </a>
-            <a href="{{ route('admin.fangowner.create') }}" class="btn btn-primary radius">
-                <i class="Hui-iconfont">&#xe600;</i> 添加房东
+            <a href="{{ route('admin.fang.create') }}" class="btn btn-primary radius">
+                <i class="Hui-iconfont">&#xe600;</i> 添加房源
             </a>
-            <a href="{{ route('admin.fangowner.exports') }}" class="btn btn-primary radius">
-                <i class="Hui-iconfont">&#xe600;</i> 导出Excel
+            <a href="#" class="btn btn-primary radius">
+                <i class="Hui-iconfont">&#xe600;</i> 导出成excel
             </a>
         </span>
     </div>
@@ -52,13 +52,14 @@
             <tr class="text-c">
                 <th width="25"><input type="checkbox" name="" value=""></th>
                 <th width="30">ID</th>
-                <th width="100">姓名</th>
-                <th width="100">身份证号</th>
-                <th width="40">性别</th>
-                <th width="40">年龄</th>
-                <th width="90">手机</th>
-                <th width="150">邮箱</th>
-                <th width="150">家庭住址</th>
+                <th width="100">房源名称</th>
+                <th width="100">小区名称</th>
+                <th width="150">小区地址</th>
+                <th width="60">租赁方式</th>
+                <th width="90">业主</th>
+                <th width="150">租金</th>
+                <th width="40">朝向</th>
+                <th width="40">状态</th>
                 <th width="150">操作</th>
             </tr>
             </thead>
@@ -67,25 +68,30 @@
                 <tr class="text-c">
                     <td><input type="checkbox" value="{{ $item->id }}" name="id[]"></td>
                     <td>{{ $item->id }}</td>
-                    <td>{{ $item->name }}</td>
-                    <td>{{ $item->card }}</td>
-                    <td>{{ $item->sex }}</td>
-                    <td>{{ $item->age }}</td>
-                    <td>{{ $item->phone }}</td>
-                    <td>{{ $item->email }}</td>
-                    <td>{{ $item->address }}</td>
+                    <td>{{ $item->fang_name }}</td>
+                    <td>{{ $item->fang_xiaoqu }}</td>
+                    <td>{{ $item->fang_addr }}</td>
+                    <td>{{ $item->fang_rent_class }}</td>
+                    <td>{{ $item->fang_owner }}</td>
+                    <td>{{ $item->fang_rent }}</td>
+                    <td>{{ $item->fang_direction }}</td>
+                    <td>
+                        @if( $item->fang_status == 0)
+                            <span onclick="changeFangStatus(this,{{ $item->id }},1)" class="label label-success radius">未租</span>
+                        @else
+                            <span onclick="changeFangStatus(this,{{ $item->id }},0)" class="label label-default radius">已租</span>
+                        @endif
+                    </td>
                     <td class="td-manage text-l">
-                        <a onclick="layer_show('查看照片','{{ route('admin.fangowner.show',$item) }}',800,500)"
-                           class="label label-warning radius">查看照片</a>
-                        {!! $item->editBtn('admin.fangowner.edit') !!}
-                        {!! $item->deleteBtn('admin.fangowner.destroy') !!}
+                        {!! $item->editBtn('admin.fang.edit') !!}
+                        {!! $item->deleteBtn('admin.fang.destroy') !!}
                     </td>
                 </tr>
             @endforeach
             </tbody>
         </table>
-        {{--分页--}}
-        {{ $data->links() }}
+        {{-- 分页 支持搜索功能 --}}
+        {{ $data->appends(request()->except('page'))->links() }}
     </div>
 </div>
 <!--_footer 作为公共模版分离出去-->
@@ -101,6 +107,26 @@
 <script>
     // 生成一个token crsf
     const _token = "{{ csrf_token() }}";
+
+    // 实现改变房源状态点击事件
+    function changeFangStatus(obj, id, status) {
+        // 请求的URL地址
+        let url = "{{ route('admin.fang.changestatus') }}";
+        $.get(url, {
+            id, status
+        }).then(ret => {
+            /*if (ret.status == 0) {
+                alert(ret.msg);
+            }*/
+            if (status == 1) {
+                $(obj).removeClass('label-success').addClass('label-default').html('已租');
+            } else if (status == 0) {
+                $(obj).removeClass('label-default').addClass('label-success').html('未租');
+            }
+            location.reload();
+        })
+    }
+
     // 给删除按钮绑定事件
     $('.delbtn').click(function (evt) {
         // 得到请求的url地址
@@ -109,11 +135,9 @@
         $.ajax({
             url,
             data: {_token},
-            type: 'DELETE',     // 这里的请求类型要与路由中定义的类型一致
+            type: 'DELETE',
             dataType: 'json'
         }).then(({status, msg}) => {
-            // .then()语法相当于 success:function({status,msg}){}
-            // {status, msg}是解构赋值，将返回来的数据拆分成一个个单个数据
             if (status == 0) {
                 // 提示插件
                 layer.msg(msg, {time: 2000, icon: 1}, () => {
@@ -129,23 +153,19 @@
     // 全选删除
     function deleteAll() {
         // 询问框
-        layer.confirm('您是真的要删除选中的房东吗？', {
+        layer.confirm('您是真的要删除选中的用户吗？', {
             btn: ['确认删除', '思考一下']
         }, () => {
-            // 选中的房东
+            // 选中的用户
             let ids = $('input[name="id[]"]:checked');
             // 删除的ID
             let id = [];
             // 循环
-            $.each(ids, (i, v) => {
+            $.each(ids, (key, val) => {
                 // dom对象 转为 jquery对象 $(dom对象)
-                // id.push($(v).val());  //等效
-                id.push(v.value);
+                // id.push($(val).val());
+                id.push(val.value);
             });
-            // 这两种写法是等效的
-            /* ids.each(function (i, v) {
-                id.push($(v).val());
-            }); */
             if (id.length > 0) {
                 // 发起ajax
                 $.ajax({

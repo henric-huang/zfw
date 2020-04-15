@@ -6,11 +6,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 // 继承可以使用 auth登录的模型类
 use Illuminate\Foundation\Auth\User as AuthUser;
+// trait按钮组
+use App\Models\Traits\Btn;
 
 class User extends AuthUser
 {
     // 调用定义的trait类 和继承效果一样
     use SoftDeletes;
+    use Btn;
 
     // 软删除标识字段
     protected $dates = ['delete_at'];
@@ -21,4 +24,10 @@ class User extends AuthUser
 
     // 隐藏字段
     protected $hidden = ['password'];
+
+    // 角色 属于
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
 }

@@ -1,4 +1,25 @@
-<!DOCTYPE HTML>
+@php
+    //给生成静态页面命名
+
+    $filename = md5(__FILE__) . '.html';
+
+
+    // filemtime() 函数返回文件内容的上次修改时间。
+    // 判断文件是否存在
+    // 判断当前文件是否有被修改。如果当前文件修改时间不大于静态页文件修改时间，说明当前文件没被修改过
+    // 判断是否在缓存周期内，文件的最后修改时间+缓存周期>当前的时间戳
+    if (file_exists($filename) && filemtime(__FILE__) <= filemtime($filename) && filemtime($filename) + 30 > time()) {
+        //如果在缓存周期内，引用之前生成的静态页面
+        include $filename;
+        exit;
+    }
+
+    //开启ob缓存；
+    ob_start();
+
+@endphp
+
+        <!DOCTYPE HTML>
 <html>
 <head>
     <meta charset="utf-8">
@@ -48,15 +69,16 @@
             <thead>
             <tr class="text-c">
                 <th width="25"><input type="checkbox" name="" value=""></th>
-                <th width="80">ID</th>
+                <th width="30">ID</th>
                 <th width="100">真实名</th>
+                <th width="100">角色</th>
                 <th width="100">用户名</th>
                 <th width="40">性别</th>
                 <th width="90">手机</th>
                 <th width="150">邮箱</th>
                 <th width="130">加入时间</th>
                 <th width="70">状态</th>
-                <th width="100">操作</th>
+                <th width="150">操作</th>
             </tr>
             </thead>
             <tbody>
@@ -71,6 +93,7 @@
                     </td>
                     <td>{{ $item->id }}</td>
                     <td>{{ $item->truename }}</td>
+                    <td>{{ $item->role->name }}</td>
                     <td>{{ $item->username }}</td>
                     <td>{{ $item->sex }}</td>
                     <td>{{ $item->phone }}</td>
@@ -78,14 +101,14 @@
                     <td>{{ $item->created_at }}</td>
                     <td class="td-status"><span class="label label-success radius">已启用</span></td>
                     <td class="td-manage">
-                        <a href="{{ route('admin.user.edit',['id'=>$item->id]) }}" class="label label-secondary radius">修改</a>
+                        <a href="{{ route('admin.user.role',$item) }}" class="label label-secondary radius">分配角色</a>
+                        {!! $item->editBtn('admin.user.edit') !!}
                         @if(auth()->id() != $item->id)
                             @if($item->deleted_at != null)
                                 <a href="{{ route('admin.user.restore',['id'=>$item->id]) }}"
                                    class="label label-warning radius">还原</a>
                             @else
-                                <a href="{{ route('admin.user.del',['id'=>$item->id]) }}"
-                                   class="label label-danger radius delbtn">删除</a>
+                                {!! $item->deleteBtn('admin.user.del') !!}
                             @endif
                         @endif
                     </td>
@@ -175,3 +198,10 @@
 </script>
 </body>
 </html>
+
+@php
+    //把ob缓存里面的内容给取出来，写入到一个文件里面；
+    $content = ob_get_contents();
+    file_put_contents($filename, $content);
+
+@endphp

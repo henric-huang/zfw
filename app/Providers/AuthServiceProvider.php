@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,10 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // token认证有效期2小时
+        Passport::tokensExpireIn(now()->addHour(2));
+
+        // 刷新token认证有效期30天
+        Passport::refreshTokensExpireIn(now()->addDays(30));
     }
 }

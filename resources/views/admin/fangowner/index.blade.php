@@ -8,13 +8,13 @@
     <link rel="stylesheet" type="text/css" href="/admin/static/h-ui.admin/skin/default/skin.css" id="skin"/>
     <link rel="stylesheet" type="text/css" href="/admin/static/h-ui.admin/css/style.css"/>
     <link rel="stylesheet" type="text/css" href="/css/pagination.css"/>
-    <title>用户列表</title>
+    <title>房东列表</title>
 </head>
 <body>
 <nav class="breadcrumb">
     <i class="Hui-iconfont">&#xe67f;</i> 首页
-    <span class="c-gray en">&gt;</span> 用户中心
-    <span class="c-gray en">&gt;</span> 用户列表
+    <span class="c-gray en">&gt;</span> 房东中心
+    <span class="c-gray en">&gt;</span> 房东列表
     <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px"
        href="javascript:location.replace(location.href);" title="刷新"><i class="Hui-iconfont">&#xe68f;</i></a>
 </nav>
@@ -30,7 +30,7 @@
         <input type="text" onfocus="WdatePicker({ minDate:'#F{$dp.$D(\'datemin\')}',maxDate:'%y-%M-%d' })" id="datemax"
                class="input-text Wdate" style="width:120px;">
         <input type="text" class="input-text" style="width:250px" placeholder="输入会员名称、电话、邮箱" id="" name="">
-        <button type="submit" class="btn btn-success radius" id="" name=""><i class="Hui-iconfont">&#xe665;</i> 搜用户
+        <button type="submit" class="btn btn-success radius" id="" name=""><i class="Hui-iconfont">&#xe665;</i> 搜房东
         </button>
     </div>
     <div class="cl pd-5 bg-1 bk-gray mt-20">
@@ -38,8 +38,11 @@
             <a class="btn btn-danger radius" onclick="deleteAll()">
                 <i class="Hui-iconfont">&#xe6e2;</i> 批量删除
             </a>
-            <a href="{{ route('admin.user.create') }}" class="btn btn-primary radius">
-                <i class="Hui-iconfont">&#xe600;</i> 添加用户
+            <a href="{{ route('admin.fangowner.create') }}" class="btn btn-primary radius">
+                <i class="Hui-iconfont">&#xe600;</i> 添加房东
+            </a>
+            <a href="{{ route('admin.fangowner.exports') }}" class="btn btn-primary radius">
+                <i class="Hui-iconfont">&#xe600;</i> 导出Excel
             </a>
         </span>
     </div>
@@ -49,47 +52,33 @@
             <tr class="text-c">
                 <th width="25"><input type="checkbox" name="" value=""></th>
                 <th width="30">ID</th>
-                <th width="100">真实名</th>
-                <th width="100">角色</th>
-                <th width="100">用户名</th>
+                <th width="100">姓名</th>
+                <th width="100">身份证号</th>
                 <th width="40">性别</th>
+                <th width="40">年龄</th>
                 <th width="90">手机</th>
                 <th width="150">邮箱</th>
-                <th width="130">加入时间</th>
-                <th width="70">状态</th>
+                <th width="150">家庭住址</th>
                 <th width="150">操作</th>
             </tr>
             </thead>
             <tbody>
             @foreach($data as $item)
                 <tr class="text-c">
-                    <td>
-                        @if(auth()->id() != $item->id)
-                            @if($item->deleted_at == null)
-                                <input type="checkbox" value="{{ $item->id }}" name="id[]">
-                            @endif
-                        @endif
-                    </td>
+                    <td><input type="checkbox" value="{{ $item->id }}" name="id[]"></td>
                     <td>{{ $item->id }}</td>
-                    <td>{{ $item->truename }}</td>
-                    <td>{{ $item->role->name }}</td>
-                    <td>{{ $item->username }}</td>
+                    <td>{{ $item->name }}</td>
+                    <td>{{ $item->card }}</td>
                     <td>{{ $item->sex }}</td>
+                    <td>{{ $item->age }}</td>
                     <td>{{ $item->phone }}</td>
                     <td>{{ $item->email }}</td>
-                    <td>{{ $item->created_at }}</td>
-                    <td class="td-status"><span class="label label-success radius">已启用</span></td>
-                    <td class="td-manage">
-                        <a href="{{ route('admin.user.role',$item) }}" class="label label-secondary radius">分配角色</a>
-                        {!! $item->editBtn('admin.user.edit') !!}
-                        @if(auth()->id() != $item->id)
-                            @if($item->deleted_at != null)
-                                <a href="{{ route('admin.user.restore',['id'=>$item->id]) }}"
-                                   class="label label-warning radius">还原</a>
-                            @else
-                                {!! $item->deleteBtn('admin.user.del') !!}
-                            @endif
-                        @endif
+                    <td>{{ $item->address }}</td>
+                    <td class="td-manage text-l">
+                        <a onclick="layer_show('查看照片','{{ route('admin.fangowner.show',$item) }}',800,500)"
+                           class="label label-warning radius">查看照片</a>
+                        {!! $item->editBtn('admin.fangowner.edit') !!}
+                        {!! $item->deleteBtn('admin.fangowner.destroy') !!}
                     </td>
                 </tr>
             @endforeach
@@ -140,10 +129,10 @@
     // 全选删除
     function deleteAll() {
         // 询问框
-        layer.confirm('您是真的要删除选中的用户吗？', {
+        layer.confirm('您是真的要删除选中的房东吗？', {
             btn: ['确认删除', '思考一下']
         }, () => {
-            // 选中的用户
+            // 选中的房东
             let ids = $('input[name="id[]"]:checked');
             // 删除的ID
             let id = [];

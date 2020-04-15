@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -113,11 +114,16 @@ class UserController extends BaseController
     }
 
     // 修改用户显示
-    public function edit(int $id)
+    /*public function edit(int $id)
     {
         $model = User::find($id);
 
         return view('admin.user.edit', compact('model'));
+    }*/
+    public function edit(User $user)
+    {
+        // dd($user->toArray());
+        return view('admin.user.edit', compact('user'));
     }
 
     // 修改用户处理
@@ -154,6 +160,27 @@ class UserController extends BaseController
         // 如果只是获取id，可用模型对象代替
         //return redirect(route('admin.user.edit', $model))->withErrors(['error' => '原密码不正确']);
         return redirect(route('admin.user.edit', ['id' => $id]))->withErrors(['原密码不正确']);
+    }
+
+    // 分配角色和处理
+    public function role(Request $request, User $user)
+    {
+        // 判断是否是post登录
+        if ($request->isMethod('post')) {
+            $post = $this->validate($request, [
+                'role_id' => 'required'
+            ], [
+                'role_id.required' => '角色必须选择'
+            ]);
+
+            $user->update($post);
+            return redirect(route('admin.user.index'));
+            // redirect是跳转到控制器，不用携带数据，顶多需要携带id或者对应的模型对象用以满足路由条件，跳转到指定控制器
+        }
+
+        // 获取全部角色信息
+        $roleAll = Role::all();
+        return view('admin.user.role', compact('roleAll', 'user'));  //view是跳转到视图，需要携带数据传给视图
     }
 
 }

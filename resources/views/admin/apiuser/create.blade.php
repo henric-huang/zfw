@@ -12,15 +12,10 @@
         {{-- 表单验证提示 --}}
         @include('admin.common.validate')
 
-        <form action="{{ route('admin.user.store') }}" method="post" class="form form-horizontal" id="form-member-add">
-            @csrf
+        <form action="{{ route('admin.apiuser.store') }}" method="post" class="form form-horizontal"
+              id="form-member-add">
 
-            <div class="row cl">
-                <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>姓名：</label>
-                <div class="formControls col-xs-8 col-sm-9">
-                    <input type="text" class="input-text" name="truename" value="{{ old('truename') }}">
-                </div>
-            </div>
+            @csrf
             <div class="row cl">
                 <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>账号：</label>
                 <div class="formControls col-xs-8 col-sm-9">
@@ -30,44 +25,12 @@
             <div class="row cl">
                 <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>密码：</label>
                 <div class="formControls col-xs-8 col-sm-9">
-                    <input type="text" class="input-text" name="password" id="password" autocomplete="off">
-                </div>
-            </div>
-            <div class="row cl">
-                <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>确认密码：</label>
-                <div class="formControls col-xs-8 col-sm-9">
-                    <input type="text" class="input-text" name="password_confirmation" autocomplete="off">
-                </div>
-            </div>
-            <div class="row cl">
-                <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>性别：</label>
-                <div class="formControls col-xs-8 col-sm-9 skin-minimal">
-                    <div class="radio-box">
-                        <input name="sex" type="radio" value="先生" checked>
-                        <label for="sex-1">先生</label>
-                    </div>
-                    <div class="radio-box">
-                        <input type="radio" value="女士" name="sex">
-                        <label for="sex-2">女士</label>
-                    </div>
-                </div>
-            </div>
-            <div class="row cl">
-                <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>手机：</label>
-                <div class="formControls col-xs-8 col-sm-9">
-                    <input type="text" class="input-text" name="phone" value="{{ old('phone') }}">
-                </div>
-            </div>
-            <div class="row cl">
-                <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>邮箱：</label>
-                <div class="formControls col-xs-8 col-sm-9">
-                    <input type="email" class="input-text" name="email" value="{{ old('email') }}">
+                    <input type="text" class="input-text" name="password" autocomplete="off">
                 </div>
             </div>
             <div class="row cl">
                 <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
                     <input class="btn btn-primary radius" type="submit" value="添加用户">
-{{--                    <button>添加用户</button>--}}
                 </div>
             </div>
         </form>
@@ -100,7 +63,7 @@
                 password: {
                     required: true
                 },
-                password_confirmation: {
+                confirmation_password: {
                     // 两次密码一致写法有点点不一样 用的是和谁一致的ID名称
                     equalTo: '#password'
                 },
@@ -108,14 +71,13 @@
                     email: true
                 },
                 phone: {
-                    // 注意jQuery Validate并没有给我买提供"phone"这条验证规则，这是我们自定义的
                     phone: true
                 }
             },
             // 消息提示
             messages: {
                 truename: {
-                    required: '真是姓名必须要写',
+                    required: '真实的名称必须要写，不能不写'
                 }
             },
             // 取消键盘事件
@@ -132,7 +94,7 @@
         // 自定义验证规则
         // 邮政编码验证
         jQuery.validator.addMethod("phone", function (value, element) {
-            // +86 - 12345
+            // patrn = /^(\+86-)?1[3-9]\d{9}$/;
             var reg1 = /^\+86-1[3-9]\d{9}$/;
             var reg2 = /^1[3-9]\d{9}$/;
             var ret = reg1.test(value) || reg2.test(value);
@@ -143,3 +105,4 @@
     </script>
 
 @endsection
+

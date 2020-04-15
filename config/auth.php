@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'web',
+        'guard'     => 'web',
         'passwords' => 'users',
     ],
 
@@ -36,15 +36,19 @@ return [
     */
 
     'guards' => [
-        'web' => [
-            'driver' => 'session',
+        'web'    => [
+            'driver'   => 'session',
             'provider' => 'users',
         ],
-
-        'api' => [
-            'driver' => 'token',
-            'provider' => 'users',
-            'hash' => false,
+        // 解决接口登录
+        'apiweb' => [
+            'driver'   => 'session',
+            'provider' => 'apiusers',
+        ],
+        'api'    => [
+            'driver'   => 'passport',
+            'provider' => 'apiusers',
+            // 'hash' => false,
         ],
     ],
 
@@ -66,10 +70,16 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'users'    => [
             'driver' => 'eloquent',
             // auth登录验证时所用的模型
-            'model' => App\Models\User::class,
+            'model'  => App\Models\User::class,
+        ],
+        // 接口所用
+        'apiusers' => [
+            'driver' => 'eloquent',
+            // auth登录验证时所用的模型
+            'model'  => App\Models\Apiuser::class,
         ],
 
         // 'users' => [
@@ -96,8 +106,8 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => 'password_resets',
-            'expire' => 60,
+            'table'    => 'password_resets',
+            'expire'   => 60,
         ],
     ],
 

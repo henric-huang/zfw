@@ -42,8 +42,8 @@
                         <td>{{ $item->id }}</td>
                         <td>{{ $item->name }}</td>
                         <td>
-                            <a class="label label-success radius"
-                               href="{{ route('admin.role.node',$item) }}">权限</a>
+                            <a class="label label-success radius" href="{{ route('admin.role.node',$item) }}">权限</a>
+                            {{--<a class="label label-success radius" href="/admin/role/node/{{ $item->id }}">权限</a>--}}
                         </td>
                         <td>{{ $item->created_at }}</td>
                         <td class="td-manage">
@@ -58,7 +58,6 @@
             {{ $data->appends(request()->except('page'))->links() }}
         </div>
     </div>
-
 @endsection
 
 @section('js')

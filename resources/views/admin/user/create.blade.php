@@ -67,6 +67,7 @@
             <div class="row cl">
                 <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
                     <input class="btn btn-primary radius" type="submit" value="添加用户">
+{{--                    <button>添加用户</button>--}}
                 </div>
             </div>
         </form>
@@ -99,7 +100,7 @@
                 password: {
                     required: true
                 },
-                confirmation_password: {
+                password_confirmation: {
                     // 两次密码一致写法有点点不一样 用的是和谁一致的ID名称
                     equalTo: '#password'
                 },

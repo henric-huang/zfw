@@ -16,5 +16,5 @@ Route::get('/', function () {
 });
 
 // 引入定义好的后台路由文件
-//include base_path('routes/admin/admin.php');
-include __DIR__ . '/admin/admin.php';
+include base_path('routes/admin/admin.php');
+//include __DIR__ . '/admin/admin.php';
