@@ -41,5 +41,11 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'v1', 'namespace' => 'Api'
     // 小程序登录
     Route::post('wxlogin', 'LoginController@wxlogin');
 
+    // 用户授权信息入库
+    // 文件上传
+    Route::post('user/upfile', 'UserController@upfile');
+    Route::post('user/userinfo', 'UserController@userinfo');
+    Route::get('user/userinfo', 'UserController@getuserinfo');
+
 });
 
