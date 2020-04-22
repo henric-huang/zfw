@@ -12,4 +12,9 @@ class Article extends Base
     {
         return $this->editBtn('admin.article.edit') . '&nbsp' . $this->deleteBtn('admin.article.destroy');
     }
+
+    public function getPicAttribute()
+    {
+        return config('url.domain') . $this->attributes['pic'];
+    }
 }

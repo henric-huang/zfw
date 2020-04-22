@@ -42,7 +42,7 @@ class UserController extends Controller
             // 参数2 配置的节点名称
             $ret = $request->file('file')->store($request->get('openid'), 'card');
             $pic = '/uploads/card/' . $ret;
-            return ['status' => 0, 'pic' => $pic];
+            return ['status' => 0, 'pic' => $pic, 'url' => config('url.domain') . $pic];
         }
         return ['status' => 1005, 'msg' => '无图片上传'];
     }

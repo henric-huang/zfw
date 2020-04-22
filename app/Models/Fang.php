@@ -4,6 +4,9 @@ namespace App\Models;
 
 class Fang extends Base
 {
+    // 追加字段
+    protected $appends = ['pic', 'shi_ting'];
+
     // 修改器
     // 房子配置
     public function setFangConfigAttribute($value)
@@ -17,15 +20,29 @@ class Fang extends Base
         $this->attributes['fang_pic'] = trim($value, '#');
     }
 
+    public function getPicAttribute()
+    {
+        $arr = explode('#', $this->attributes['fang_pic']);
+        return config('url.domain') . $arr[0];
+    }
+
+    // 几室几厅
+    public function getShiTingAttribute()
+    {
+        return $this->attributes['fang_shi'] . '室' . $this->attributes['fang_ting'] . '厅';
+    }
+
     // 访问器
     // 房源配置
-    public function getFangConfAttribute() {
+    public function getFangConfAttribute()
+    {
         return explode(',', $this->attributes['fang_config']);
     }
 
     // 房源图片配置
-    public function getImagesAttribute() {
-        $arr = explode('#', $this->attributes['fang_pic']);
+    public function getImagesAttribute()
+    {
+        $arr  = explode('#', $this->attributes['fang_pic']);
         $html = '';
         foreach ($arr as $item) {
             $html .= "<img src='$item' style='width: 100px;' />&nbsp;&nbsp;";

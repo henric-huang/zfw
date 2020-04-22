@@ -68,12 +68,12 @@ class UserController extends BaseController
 
 
         // 发邮件给用户   匿名函数内部获取外部数据，使用"use (外部数据)"
-        \Mail::send('mail.useradd', compact('userModel', 'pwd'), function (Message $message) use ($userModel) {
+        /*\Mail::send('mail.useradd', compact('userModel', 'pwd'), function (Message $message) use ($userModel) {
             // 发给谁
             $message->to($userModel->email);
             // 主题
             $message->subject('邮件标题');
-        });
+        });*/
 
         // 跳转到列表页
         return redirect(route('admin.user.index'))->with('success', '添加用户成功');

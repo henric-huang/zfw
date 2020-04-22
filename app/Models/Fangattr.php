@@ -12,4 +12,10 @@ class Fangattr extends Base
         // 调用父类中的递归层级函数
         return $this->treeLevel($data);
     }
+
+    // 获取器
+    public function getIconAttribute()
+    {
+        return config('url.domain') . $this->attributes['icon'];
+    }
 }

@@ -47,5 +47,35 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'v1', 'namespace' => 'Api'
     Route::post('user/userinfo', 'UserController@userinfo');
     Route::get('user/userinfo', 'UserController@getuserinfo');
 
+    // 看房通知
+    Route::get('notices', 'NoticeController@index');
+
+    // 资讯列表
+    Route::get('news', 'NewsController@index');
+
+    // 使用路由参数
+    Route::get('news/{article}', 'NewsController@show');
+
+    // 资讯用户访问记录
+    Route::post('news/{article}', 'NewsController@count');
+
+    // 房源
+    // 房源列表
+    Route::get('fangs', 'FangController@fang');
+    // es搜索
+    Route::get('esfangs', 'FangController@esfang');
+    // 推荐房源
+    Route::get('fangs/recommend', 'FangController@recommend');
+    // 房源属性
+    Route::get('fangs/attr', 'FangController@attr');
+    // 房源详情
+    Route::get('fangs/{fang}', 'FangController@detail');
+
+    // 房源属性接口
+    Route::get('fangattrs', 'FangAttrController@attr');
+
+    // 添加收藏
+    Route::post('favs', 'FavController@add');
+
 });
 
