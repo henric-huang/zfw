@@ -34,4 +34,30 @@ class FavController extends Controller
         }
 
     }
+
+    // 查询用户是否有收藏房源
+    public function show(Request $request)
+    {
+        $openid  = $request->get('openid');
+        $fang_id = $request->get('fang_id');
+        $ret     = Fav::where('openid', $openid)->where('fang_id', $fang_id)->first();
+        if (is_null($ret)) {
+            return ['status' => 0];
+        }
+        return ['status' => 1];
+    }
+
+    // 取消收藏
+    public function delete(Request $request)
+    {
+        $openid  = $request->get('openid');
+        $fang_id = $request->get('fang_id');
+        $ret     = Fav::where('openid', $openid)->where('fang_id', $fang_id)->first();
+        if (is_null($ret)) {
+            return ['status' => 0];
+        } else {
+            Fav::where('openid', $openid)->where('fang_id', $fang_id)->delete();
+            return ['status' => 0];
+        }
+    }
 }

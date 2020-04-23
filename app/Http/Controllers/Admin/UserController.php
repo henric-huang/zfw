@@ -13,6 +13,14 @@ class UserController extends BaseController
     // 用户列表
     public function index()
     {
+        /*$info = User::with('role.nodes')->where('id', 1)->first()->toArray();
+        dd($info);*/
+
+        /*$info = User::where('id', 1)->first();
+        // $info = $info->role->toArray();
+        $info = $info->role->nodes->toArray();
+        dd($info);*/
+
         // 分页
         $data = User::orderBy('id', 'asc')->withTrashed()->paginate($this->pagesize);
 

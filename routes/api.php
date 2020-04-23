@@ -76,6 +76,10 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'v1', 'namespace' => 'Api'
 
     // 添加收藏
     Route::post('favs', 'FavController@add');
+    // 查询收藏
+    Route::get('favs/show', 'FavController@show');
+    // 取消收藏
+    Route::delete('favs/delete', 'FavController@delete');
 
 });
 
